@@ -16,7 +16,10 @@ export class EndpointsScanner extends BaseScanner {
   private getEndpointFiles() {
     const files = this.getOrThrow(this.project.getSourceFiles());
 
-    return files.filter((file) => file.getFilePath().includes("endpoints/"));
+    return files.filter((file) => {
+      console.log({ path: file.getFilePath() });
+      return file.getFilePath().includes("endpoints/");
+    });
   }
 
   private getDefaultExportedFunctionsFromFiles(

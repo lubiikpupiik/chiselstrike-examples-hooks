@@ -5,7 +5,9 @@ export class FileManager {
   constructor(private readonly project: Project) {}
 
   createFile() {
-    const file = this.project.createSourceFile(this.destination);
+    const file = this.project.createSourceFile(this.destination, undefined, {
+      overwrite: true,
+    });
 
     file.saveSync();
 

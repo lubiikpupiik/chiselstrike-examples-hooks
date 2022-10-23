@@ -22,7 +22,7 @@ export class HooksManager {
   }
 
   private createHookFunctionFromType(type: TypesResult) {
-    const name = type.file.getBaseName();
+    const name = type.file.getBaseName().replace(".ts", "");
 
     const fun = this.file.addFunction({
       name: this.formatHookName(name),
@@ -30,30 +30,56 @@ export class HooksManager {
       parameters: [{ name: this.argumentName, type: "PublicChieselFetchArgs" }],
     });
 
-    this.addHookBody(fun, name);
+    const responseType = this.formatResponseType(
+      type.func.getReturnType().getText()
+    );
+
+    if (type.file.getFilePath().includes("get/")) {
+      this.addHookBodyGet(fun, name, responseType);
+    } else if (type.file.getFilePath().includes("post/")) {
+      this.addHookBodyPost(fun, name, responseType);
+    }
   }
 
   private formatHookName(name: string) {
     const [firstLetter, ...restOfTheName] = name;
 
     const formattedRestOfTheName = restOfTheName
-      .join()
-      .replace(/_*\w/, ([_, char]) => char.toUpperCase());
+      .join("")
+      .replace(/_\w/g, ([_, char]) => char.toUpperCase());
 
-    return `use${firstLetter}${formattedRestOfTheName}`;
+    return `use${firstLetter.toUpperCase()}${formattedRestOfTheName}`;
   }
 
-  private addHookBody(fun: FunctionDeclaration, name: string) {
+  private addHookBodyGet(
+    fun: FunctionDeclaration,
+    name: string,
+    responseType: string
+  ) {
     fun.setBodyText((write) => {
       write.writeLine(
-        `return useChiselFetch<${this.getRespnseType(
-          fun
-        )}>({ url: ${name}, ...${this.argumentName} });`
+        `return useChiselFetch<${responseType}>({ url: '${name}', ...${this.argumentName} });`
       );
     });
   }
 
-  private getRespnseType(fun: FunctionDeclaration) {
-    return fun.getReturnType().getText();
+  private addHookBodyPost(
+    fun: FunctionDeclaration,
+    name: string,
+    argumentType: string
+  ) {
+    fun.setBodyText((write) => {
+      write.writeLine(
+        `return useChiselPost<${argumentType}>({ url: '${name}', ...${this.argumentName} })`
+      );
+    });
+  }
+
+  private formatResponseType(responseType: string) {
+    const formattedResponseType = responseType.match(/(?<=Promise<)(.*)(?=>)/);
+
+    return formattedResponseType !== null
+      ? formattedResponseType[0]
+      : responseType;
   }
 }

@@ -1,5 +1,4 @@
 import { Project } from "ts-morph";
-import { BaseScanner } from "./base_scanner";
 import { typesPath, endpointsPath } from "./constants";
 import { FileManager } from "./manager/file.manager";
 import { HooksManager } from "./manager/hooks.manager";
@@ -9,18 +8,19 @@ import { EndpointsScanner } from "./scanners/endpoints.scanner";
 import { TypesScanner } from "./scanners/types.scanner";
 
 export class Executor {
-  project: Project;
+  private project: Project;
 
   endpointsPath = endpointsPath;
   typesPath = typesPath;
 
-  fileManager: FileManager;
+  private fileManager: FileManager;
 
-  typesScanner: TypesScanner;
+  private typesScanner: TypesScanner;
 
-  endpointsScanner: EndpointsScanner;
+  private endpointsScanner: EndpointsScanner;
 
   constructor() {
+    this.project = new Project();
     this.initProject();
     this.fileManager = new FileManager(this.project);
     this.typesScanner = new TypesScanner(this.project);
@@ -28,8 +28,6 @@ export class Executor {
   }
 
   initProject() {
-    this.project = new Project();
-
     this.project.addSourceFilesAtPaths(this.endpointsPath);
     this.project.addSourceFilesAtPaths(this.typesPath);
   }
