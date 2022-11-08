@@ -9,7 +9,7 @@ export class FileManager {
       overwrite: true,
     });
 
-    file.saveSync();
+    // file.saveSync();
 
     return file;
   }

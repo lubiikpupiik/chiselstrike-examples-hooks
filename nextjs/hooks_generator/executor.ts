@@ -13,18 +13,9 @@ export class Executor {
   endpointsPath = endpointsPath;
   typesPath = typesPath;
 
-  private fileManager: FileManager;
-
-  private typesScanner: TypesScanner;
-
-  private endpointsScanner: EndpointsScanner;
-
   constructor() {
     this.project = new Project();
     this.initProject();
-    this.fileManager = new FileManager(this.project);
-    this.typesScanner = new TypesScanner(this.project);
-    this.endpointsScanner = new EndpointsScanner(this.project);
   }
 
   initProject() {
@@ -33,18 +24,28 @@ export class Executor {
   }
 
   execute() {
-    const file = this.fileManager.createFile();
+    const fileManager = new FileManager(this.project);
+
+    const file = fileManager.createFile();
 
     const templateManager = new TemplateManager(file);
 
     templateManager.addTemplate();
 
-    const interfaceManager = new InterfaceManager(file, this.typesScanner);
+    const interfaceManager = new InterfaceManager(
+      file,
+      new TypesScanner(this.project)
+    );
 
     interfaceManager.addInterfaces();
 
-    const hooksManager = new HooksManager(file, this.endpointsScanner);
+    const hooksManager = new HooksManager(
+      file,
+      new EndpointsScanner(this.project)
+    );
 
     hooksManager.addHooks();
+
+    file.saveSync();
   }
 }

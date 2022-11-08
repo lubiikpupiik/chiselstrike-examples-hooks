@@ -6,7 +6,7 @@ export class TemplateManager {
   addTemplate() {
     this.addImports();
     this.addArgsTypeForExport();
-    this.file.saveSync();
+    // this.file.saveSync();
   }
 
   private addImports() {
@@ -14,7 +14,9 @@ export class TemplateManager {
       moduleSpecifier: "./hooks_generator/helpers/hooks",
       namedImports: [
         { name: "useChiselFetch" },
-        { name: "PublicChieselFetchArgs" },
+        { name: "useChiselPut" },
+        { name: "PublicChiselFetchArgs" },
+        { name: "PublicChiselPutArgs" },
       ],
     });
   }
@@ -22,7 +24,13 @@ export class TemplateManager {
   private addArgsTypeForExport() {
     this.file.addTypeAlias({
       name: "ChiselFetchArgs",
-      type: "PublicChieselFetchArgs",
+      type: "PublicChiselFetchArgs",
+      isExported: true,
+    });
+
+    this.file.addTypeAlias({
+      name: "ChiselPutArgs",
+      type: "PublicChiselPutArgs",
       isExported: true,
     });
   }

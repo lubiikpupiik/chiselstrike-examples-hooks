@@ -18,7 +18,7 @@ export class InterfaceManager {
 
     this.createInterfacesFromTypes(types);
 
-    this.file.saveSync();
+    // this.file.saveSync();
   }
 
   private createInterfacesFromTypes(types: TypesResults) {

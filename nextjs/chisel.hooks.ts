@@ -1,19 +1,17 @@
-import {
-  useChiselFetch,
-  PublicChieselFetchArgs,
-} from "./hooks_generator/helpers/hooks";
+import { useChiselFetch, useChiselPut, PublicChiselFetchArgs, PublicChiselPutArgs } from "./hooks_generator/helpers/hooks";
 
-export type ChiselFetchArgs = PublicChieselFetchArgs;
+export type ChiselFetchArgs = PublicChiselFetchArgs;
+export type ChiselPutArgs = PublicChiselPutArgs;
 
 export interface Person {
-  firstName: string;
-  lastName: string;
+    firstName: string;
+    lastName: string;
 }
 
-export function useGetAllPeople(params: PublicChieselFetchArgs) {
-  return useChiselFetch<Response>({ url: "get_all_people", ...params });
+export function useGetAllPeople(params?: PublicChiselFetchArgs) {
+    return useChiselFetch({ url: 'get_all_people', ...params });
 }
 
-export function useImportPerson(params: PublicChieselFetchArgs) {
-  return useChiselFetch<Response>({ url: "import_person", ...params });
+export function useImportPerson(params?: PublicChiselPutArgs) {
+    return useChiselPut({ url: 'import_person', ...params })
 }

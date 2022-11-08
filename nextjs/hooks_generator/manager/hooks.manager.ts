@@ -14,7 +14,7 @@ export class HooksManager {
 
     this.createHookFunctionsFromTypes(types);
 
-    this.file.saveSync();
+    // this.file.saveSync();
   }
 
   private createHookFunctionsFromTypes(types: TypesResult[]) {
@@ -27,7 +27,14 @@ export class HooksManager {
     const fun = this.file.addFunction({
       name: this.formatHookName(name),
       isExported: true,
-      parameters: [{ name: this.argumentName, type: "PublicChieselFetchArgs" }],
+      parameters: [
+        {
+          name: `${this.argumentName}?`,
+          type: type.file.getFilePath().includes("get/")
+            ? "PublicChiselFetchArgs"
+            : "PublicChiselPutArgs",
+        },
+      ],
     });
 
     const responseType = this.formatResponseType(
@@ -35,9 +42,9 @@ export class HooksManager {
     );
 
     if (type.file.getFilePath().includes("get/")) {
-      this.addHookBodyGet(fun, name, responseType);
-    } else if (type.file.getFilePath().includes("post/")) {
-      this.addHookBodyPost(fun, name, responseType);
+      this.addHookBodyGet(fun, name);
+    } else if (type.file.getFilePath().includes("put/")) {
+      this.addHookBodyPut(fun, name);
     }
   }
 
@@ -51,26 +58,18 @@ export class HooksManager {
     return `use${firstLetter.toUpperCase()}${formattedRestOfTheName}`;
   }
 
-  private addHookBodyGet(
-    fun: FunctionDeclaration,
-    name: string,
-    responseType: string
-  ) {
+  private addHookBodyGet(fun: FunctionDeclaration, name: string) {
     fun.setBodyText((write) => {
       write.writeLine(
-        `return useChiselFetch<${responseType}>({ url: '${name}', ...${this.argumentName} });`
+        `return useChiselFetch({ url: '${name}', ...${this.argumentName} });`
       );
     });
   }
 
-  private addHookBodyPost(
-    fun: FunctionDeclaration,
-    name: string,
-    argumentType: string
-  ) {
+  private addHookBodyPut(fun: FunctionDeclaration, name: string) {
     fun.setBodyText((write) => {
       write.writeLine(
-        `return useChiselPost<${argumentType}>({ url: '${name}', ...${this.argumentName} })`
+        `return useChiselPut({ url: '${name}', ...${this.argumentName} })`
       );
     });
   }

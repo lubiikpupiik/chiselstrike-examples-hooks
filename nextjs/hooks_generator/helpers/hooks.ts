@@ -2,18 +2,20 @@ import React, { useContext, useEffect, useState } from "react";
 import { chiselFetch } from "@chiselstrike/frontend";
 import { ChiselContext } from "./context";
 
-interface ChieselFetchArgs {
+interface ChiselFetchArgs {
   url: string;
-  shouldFetchOnMount: boolean;
+  shouldFetchOnMount?: boolean;
 }
 
-export type PublicChieselFetchArgs = Omit<ChieselFetchArgs, "url">;
+export type PublicChiselFetchArgs = Omit<ChiselFetchArgs, "url">;
 
-export function useChiselFetch<T>({
+export function useChiselFetch({
   url,
-  shouldFetchOnMount,
-}: ChieselFetchArgs) {
-  const [data, setData] = React.useState<T | undefined>();
+  shouldFetchOnMount = true,
+}: ChiselFetchArgs) {
+  const [data, setData] = React.useState<
+    Record<string, unknown>[] | undefined
+  >();
   const [errors, setErrors] = React.useState<any>(undefined);
   const [isLoading, setIsLoading] = React.useState(false);
   const chisel = useContext(ChiselContext);
@@ -21,13 +23,10 @@ export function useChiselFetch<T>({
   const fetch = async () => {
     setIsLoading(true);
     try {
-      const res: { json: () => Promise<T> } = await chiselFetch(
-        chisel,
-        `dev/${url}`,
-        {
+      const res: { json: () => Promise<Record<string, unknown>[]> } =
+        await chiselFetch(chisel, `dev/${url}`, {
           method: "GET",
-        }
-      );
+        });
       const jsonData = await res.json();
 
       setData(jsonData);
@@ -50,19 +49,19 @@ export function useChiselFetch<T>({
   return { refetch: fetch, data, errors, isLoading };
 }
 
-interface ChiselPostArgs {
+interface ChiselPutArgs {
   url: string;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
-export type PublicChiselPostArgs = Omit<ChiselPostArgs, "url">;
+export type PublicChiselPutArgs = Omit<ChiselPutArgs, "url">;
 
-export function useChiselPost<TArguments>({ url, onSuccess }: ChiselPostArgs) {
+export function useChiselPut({ url, onSuccess }: ChiselPutArgs) {
   const chisel = useContext(ChiselContext);
   const [errors, setErrors] = useState(undefined);
   const [isLoading, setIsLoading] = useState(false);
 
-  const post = async (args: TArguments) => {
+  const put = async (args: any) => {
     setIsLoading(true);
     try {
       await chiselFetch(chisel, `dev/${url}`, {
@@ -72,6 +71,7 @@ export function useChiselPost<TArguments>({ url, onSuccess }: ChiselPostArgs) {
         },
         body: JSON.stringify(args),
       });
+      onSuccess?.();
     } catch (error) {
       setErrors(errors);
     } finally {
@@ -79,5 +79,5 @@ export function useChiselPost<TArguments>({ url, onSuccess }: ChiselPostArgs) {
     }
   };
 
-  return { post, errors, isLoading };
+  return { put, errors, isLoading };
 }
